@@ -26,6 +26,7 @@ class BackyardFlyer(Drone):
         self.all_waypoints = []
         self.in_mission = True
         self.check_state = {}
+        self.square_size = 10.0
 
         # initial state
         self.flight_state = States.MANUAL
@@ -45,11 +46,11 @@ class BackyardFlyer(Drone):
         current_position[2] = current_position[2] * -1
 
         #check if drone is close enough to target position
-        position_reached = np.allclose(self.target_position, current_position, rtol=0.0, atol=0.2, equal_nan=False)
+        position_reached = np.allclose(self.target_position, current_position, rtol=0.0, atol=0.25, equal_nan=False)
         if position_reached == True:
             print("target position {} reached".format(self.target_position))
             if self.flight_state == States.TAKEOFF:
-                self.all_waypoints = self.calculate_box(self.target_position, 10)
+                self.all_waypoints = self.calculate_box(self.target_position, self.square_size)
                 print("Waypoints: {}".format(self.all_waypoints))
                 self.flight_state = States.WAYPOINT
                 self.waypoint_transition()
@@ -58,8 +59,6 @@ class BackyardFlyer(Drone):
 
     def velocity_callback(self):
         """
-        TODO: Implement this method
-
         This triggers when `MsgID.LOCAL_VELOCITY` is received and self.local_velocity contains new data
         """
         if self.flight_state == States.LANDING:
@@ -68,8 +67,6 @@ class BackyardFlyer(Drone):
 
     def state_callback(self):
         """
-        TODO: Implement this method
-
         This triggers when `MsgID.STATE` is received and self.armed and self.guided contain new data
         """
         #check if drone is in mission
